@@ -1,0 +1,9 @@
+{
+  // Frontend only: serves the static Vite build. The backend is not deployed to Workers.
+  "name": "tiny-flat-checker",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./apps/frontend/dist",
+    "not_found_handling": "single-page-application"
+  }
+}

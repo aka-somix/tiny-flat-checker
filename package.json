@@ -1,0 +1,29 @@
+{
+  "name": "tiny-flat-checker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "typecheck": "pnpm -r run typecheck",
+    "dev:backend": "pnpm --filter @flat-checker/backend run dev",
+    "dev:frontend": "pnpm --filter @flat-checker/frontend run dev",
+    "storybook": "pnpm --filter @flat-checker/frontend run storybook",
+    "openapi": "pnpm --filter @flat-checker/backend run openapi",
+    "deploy": "pnpm --filter @flat-checker/frontend run build && wrangler deploy"
+  },
+  "packageManager": "pnpm@10.31.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd"
+    ]
+  },
+  "devDependencies": {
+    "wrangler": "^4.149.0"
+  }
+}

@@ -1,0 +1,22 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Introduction" />
+
+# Tiny Flat Checker — component library
+
+Everything under `src/ui` is **presentational**: components receive data and
+callbacks through props and never fetch, route, or import from `api/`,
+`features/` or `pages/` (ESLint enforces this).
+
+| Level         | What it is                                                | Examples                   |
+| ------------- | --------------------------------------------------------- | -------------------------- |
+| **Atoms**     | One element, no app knowledge                             | Button, Input, Badge, Icon |
+| **Molecules** | Small compositions of atoms                               | FormField, SearchBar       |
+| **Organisms** | Larger UI sections built from molecules, still props-only | Header, ResultList         |
+| **Templates** | Page-level layouts with slots, no real data               | AppShell, TwoColumnLayout  |
+
+Logic lives outside: `src/features/*` holds hooks and container components that
+call `src/api` and pass data down; `src/pages/*` composes templates and features.
+
+Every component ships with a `*.stories.tsx` and a `*.test.tsx` next to it.
+Styling uses the tokens in `ui/tokens/theme.css` only.
