@@ -1,7 +1,8 @@
 # Tiny Flat Checker
 
-_One-line pitch goes here._ A tiny web app, currently a scaffold only: no views,
-no business logic, just a `/health` endpoint.
+Check a flat before buying it. One versioned checklist of the checks you'd never
+remember on the day, filled in on your phone during the viewing, then saved to
+your profile (invite-only Google sign-in) or downloaded as a PDF.
 
 ## Stack
 
@@ -10,8 +11,11 @@ TypeScript monorepo (pnpm workspaces):
 - **`packages/shared`**: zod schemas + inferred types shared by client and
   server (the source of the API contract).
 - **`apps/backend`**: Fastify REST API, class-based controllers wired through a
-  DI container, zod type provider, OpenAPI 3.1 generated from the code. No
-  database, no auth, local only.
+  DI container, zod type provider, OpenAPI 3.1 generated from the code.
+  Storage in Supabase Postgres through the Data API; `/public/*` needs an API
+  key, `/private/*` a Supabase Auth JWT.
+- **`supabase/migrations`**: schema, API-key functions, invite-only auth hook,
+  checklist templates.
 - **`apps/frontend`**: React + Vite + Tailwind v4 + TanStack Query, with an
   atomic component library (`src/ui`) kept strictly apart from the logic
   (`src/features`) and browsed in Storybook.
@@ -24,6 +28,8 @@ version for you.
 
 ```bash
 pnpm install
+cp apps/backend/.env.example apps/backend/.env     # fill in (see Supabase setup)
+cp apps/frontend/.env.example apps/frontend/.env   # fill in (see Supabase setup)
 
 # 1. Start the API (http://localhost:4000)
 pnpm run dev:backend
@@ -37,6 +43,34 @@ pnpm run storybook
 
 The frontend reads the API base URL from `VITE_API_URL`, which defaults to
 `http://localhost:4000` (see `apps/frontend/.env.example`).
+
+## Supabase setup (once per project)
+
+1. Install the [Supabase CLI](https://supabase.com/docs/guides/cli), then
+   `supabase init` (keeps the existing `supabase/migrations`),
+   `supabase link --project-ref <ref>` and `supabase db push`.
+2. Create the API-key salt in Vault (SQL editor):
+   `select vault.create_secret('<long random string>', 'api_key_salt');`
+3. Mint the web app key and copy the result into `VITE_API_KEY`:
+   `select public.create_api_key('webapp');` (shown once; only its HMAC is stored).
+4. Authentication → Providers → **Google**: enable it with a Google OAuth client
+   (authorised redirect URI: `https://<ref>.supabase.co/auth/v1/callback`).
+   Authentication → URL configuration: add `http://localhost:5173` and the
+   production URL to the redirect URLs.
+5. Authentication → Hooks → **Before User Created**: select
+   `public.hook_before_user_created`. Only invited emails can sign up.
+6. Invite people: `insert into public.invited_emails (email) values ('friend@example.com');`
+   (lowercase). Revoke by deleting the row.
+7. Make sure the project uses asymmetric JWT signing keys (default on new
+   projects): the backend verifies tokens against
+   `https://<ref>.supabase.co/auth/v1/.well-known/jwks.json`.
+
+Env: backend `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `CORS_ORIGIN`; frontend
+`VITE_API_URL`, `VITE_API_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`.
+
+New checklist version: add a migration inserting `version = N+1` into
+`checklist_templates`. Saved checks keep rendering with the version they were
+filled on.
 
 ## Scripts
 
@@ -59,9 +93,15 @@ it never drifts from the code:
 - While the backend runs: Swagger UI at http://localhost:4000/docs, raw spec at
   http://localhost:4000/docs/json.
 
-| Method | Path      | Description    |
-| ------ | --------- | -------------- |
-| GET    | `/health` | Liveness probe |
+| Method | Path                          | Auth    | Description                          |
+| ------ | ----------------------------- | ------- | ------------------------------------ |
+| GET    | `/health`                     | none    | Liveness probe                       |
+| GET    | `/public/checklists/current`  | API key | Latest checklist template            |
+| GET    | `/public/checklists/:version` | API key | A checklist template by version      |
+| POST   | `/private/flatchecks`         | JWT     | Store a flat check                   |
+| GET    | `/private/flatchecks`         | JWT     | My flat checks, newest first         |
+| GET    | `/private/flatchecks/:id`     | JWT     | One of my flat checks                |
+| DELETE | `/private/flatchecks/:id`     | JWT     | Delete one of my flat checks         |
 
 ## Component library
 
@@ -92,4 +132,4 @@ blocks `ui/` from importing `api/`, `features/`, `pages/`, TanStack Query or
 Only the **frontend** is deployed: `pnpm run deploy` builds `apps/frontend` and
 publishes the static build to Cloudflare Workers via `wrangler.jsonc` (assets +
 SPA fallback). Log in once with `pnpm exec wrangler login`. The backend runs
-locally only.
+locally for now (hosting not decided yet; Supabase hosts the database and auth).

@@ -1,19 +1,23 @@
 /*
- * Design tokens for the component library. Components use the generated
- * utilities (bg-surface, text-ink, ...) — never raw hex values.
- * Placeholder palette: replace when the visual direction is decided.
+ * Design tokens: Terminal Yellow Wayfinding.
+ * Sign yellow is the panel ground, sign black carries type, frames and reversed
+ * (selected) states, white is reserved for pictograms and input fields.
+ * Components use the generated utilities (bg-surface, text-ink, ...), never raw hex.
  */
 @theme {
-  --color-surface: #fafaf9;
-  --color-surface-raised: #ffffff;
-  --color-ink: #1c1917;
-  --color-ink-muted: #57534e;
-  --color-line: #e7e5e4;
-  --color-accent: #2563eb;
-  --color-danger: #dc2626;
-  --color-success: #16a34a;
+  --color-surface: #ffcc00; /* sign yellow: the page and panel ground */
+  --color-surface-raised: #ffffff; /* input fields */
+  --color-surface-sunken: #f2bf00; /* pressed / hovered yellow */
+  --color-ink: #0b0b0b; /* sign black: type, frames, selected tiles */
+  --color-ink-muted: #4a3b00; /* secondary text, tinted from the yellow hue (7:1 on surface) */
+  --color-panel: #1a1a1a; /* black panel frame behind section bands */
+  --color-on-panel: #ffffff; /* pictograms and type on black */
+  --color-line: #0b0b0b;
+  --color-accent: #0b0b0b;
+  --color-danger: #8f0017; /* 5.6:1 on sign yellow */
+  --color-success: #0b0b0b;
 
-  --font-body: system-ui, sans-serif;
-  --font-display: system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible Next Variable", system-ui, sans-serif;
+  --font-display: "Atkinson Hyperlegible Next Variable", system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, monospace;
 }

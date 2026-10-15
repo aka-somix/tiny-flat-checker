@@ -9,3 +9,7 @@ coverage/
 storybook-static/
 .env
 .env.local
+
+# Impeccable review captures and downloaded reference boards
+**/.impeccable/review/
+**/.impeccable/ref/

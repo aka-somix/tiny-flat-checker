@@ -50,10 +50,29 @@ Standards for the Fastify REST API. Follow these without being asked.
   in `http/errors.ts` maps them (and zod validation errors) to JSON responses.
   Error body shape: `{ error: string, details?: unknown }`.
 
-## Scope (for now)
-- **No database** — keep state out of the backend until storage is designed.
-- **No auth, no API keys.** The app runs locally only; the backend is not
-  deployed (only the frontend goes to Cloudflare).
+## Storage and auth
+- **Storage is Supabase Postgres via the Data API** (`@supabase/supabase-js`
+  with the secret key, built in `container.ts`). Schema changes are SQL
+  migrations in `supabase/migrations/` (one new file per change, never edit an
+  applied one). Every table has RLS on with no policies: only the backend reads
+  or writes.
+- Supabase repositories live in `supabase-<name>.repository.ts`; in-memory twins
+  (`memory-<name>.repository.ts`) back the tests and the OpenAPI generator via
+  `memoryDeps()`. Never call Supabase from a test.
+- **Two guarded segments**, each an encapsulated plugin in `app.ts`:
+  - `/public/*` — `apiKeyGuard`: `x-api-key` verified by the Postgres function
+    `verify_api_key` (HMAC with the Vault secret `api_key_salt`; the salt never
+    leaves the database).
+  - `/private/*` — `jwtGuard`: Supabase Auth access token verified against the
+    project JWKS; the user is read with `currentUser(req)`.
+  New routes go in one of the two segments and declare `security` in their schema.
+- Invite-only sign-up is enforced in Supabase by the `hook_before_user_created`
+  auth hook (`invited_emails` table), not in the backend.
+- Checklist templates are versioned rows; a published version is never edited.
+  Add a new version in a new migration. Answers are validated against their
+  version with `validateValues` from `@flat-checker/shared`.
+- The backend runs locally for now (hosting not decided); only the frontend is
+  deployed to Cloudflare.
 
 ## Testing (TDD)
 - Write the test first. Endpoint tests use `buildApp(createContainer(...))` +

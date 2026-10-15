@@ -1,2 +1,1 @@
-// templates barrel — export each component as it is added.
-export {};
+export * from "./AppShell.js";

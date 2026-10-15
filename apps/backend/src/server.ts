@@ -1,10 +1,10 @@
 import { buildApp } from "./app.js";
-import { createContainer } from "./container.js";
+import { createContainer, supabaseDeps } from "./container.js";
 
 const PORT = Number.parseInt(process.env.PORT ?? "4000", 10);
 const isProduction = process.env.NODE_ENV === "production";
 
-const app = await buildApp(createContainer(), {
+const app = await buildApp(createContainer(supabaseDeps(process.env)), {
   logger: {
     level: process.env.LOG_LEVEL ?? "info",
     ...(isProduction ? {} : { transport: { target: "pino-pretty" } }),

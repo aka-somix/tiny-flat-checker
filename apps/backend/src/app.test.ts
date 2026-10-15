@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { buildApp } from "./app.js";
-import { createContainer } from "./container.js";
+import { testContainer } from "./test/fixtures.js";
 
 describe("app", () => {
   let app: FastifyInstance;
 
   beforeEach(async () => {
-    app = await buildApp(createContainer());
+    app = await buildApp(testContainer());
   });
 
   afterEach(async () => {

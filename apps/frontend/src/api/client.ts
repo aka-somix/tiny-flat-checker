@@ -1,15 +1,27 @@
-import type { HealthResponse } from "@flat-checker/shared";
+import type {
+  ChecklistTemplate,
+  CreateFlatCheck,
+  FlatCheck,
+  FlatCheckSummary,
+  HealthResponse,
+} from "@flat-checker/shared";
+import { getAccessToken } from "./supabase.js";
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
+const API_KEY = import.meta.env.VITE_API_KEY ?? "";
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers as Record<string, string> | undefined),
-    },
-  });
+/** `public` sends the web app API key, `private` the Supabase access token. */
+type Access = "open" | "public" | "private";
+
+async function request<T>(path: string, access: Access, init?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = { ...(init?.headers as Record<string, string> | undefined) };
+  if (init?.body) headers["Content-Type"] = "application/json";
+  if (access === "public") headers["x-api-key"] = API_KEY;
+  if (access === "private") {
+    const token = await getAccessToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+  const res = await fetch(`${BASE_URL}${path}`, { ...init, headers });
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     try {
@@ -25,5 +37,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  getHealth: () => request<HealthResponse>("/health"),
+  getHealth: () => request<HealthResponse>("/health", "open"),
+  getChecklist: (version: number | "current") =>
+    request<ChecklistTemplate>(`/public/checklists/${version}`, "public"),
+  listFlatChecks: () => request<FlatCheckSummary[]>("/private/flatchecks", "private"),
+  getFlatCheck: (id: string) => request<FlatCheck>(`/private/flatchecks/${id}`, "private"),
+  createFlatCheck: (input: CreateFlatCheck) =>
+    request<FlatCheck>("/private/flatchecks", "private", { method: "POST", body: JSON.stringify(input) }),
+  deleteFlatCheck: (id: string) => request<void>(`/private/flatchecks/${id}`, "private", { method: "DELETE" }),
 };
