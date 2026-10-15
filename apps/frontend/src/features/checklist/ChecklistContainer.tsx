@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Download, LogIn, RotateCcw, Save, X } from "lucide-react";
 import type { ChecklistTemplate, FlatCheckValues } from "@flat-checker/shared";
 import { useChecklist, useCreateFlatCheck } from "../../api/hooks.js";
@@ -9,7 +9,7 @@ import {
   ChecklistForm,
   ConfirmDialog,
   FlatSign,
-  Spinner,
+  PageLoader,
   StartSign,
   type FlatSignErrors,
 } from "../../ui/index.js";
@@ -25,7 +25,7 @@ const answeredValues = (values: FlatCheckValues) =>
 /** The landing checklist: loads the current template, then hands over to the form. */
 export function ChecklistContainer() {
   const { data: template, isPending, isError, refetch } = useChecklist("current");
-  if (isPending) return <Spinner label="Loading the checklist" className="py-10 text-lg" />;
+  if (isPending) return <PageLoader label="Loading the checklist" linkAs={Link} className="py-10" />;
   if (isError || !template) {
     return (
       <div role="alert" className="flex flex-col items-start gap-3 rounded-[6px] border-4 border-ink p-4">

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { RotateCcw } from "lucide-react";
 import { useDeleteFlatCheck, useFlatChecks, useLoadFlatCheckWithTemplate } from "../../api/hooks.js";
-import { Button, ConfirmDialog, FlatCheckList, Spinner, UserCard } from "../../ui/index.js";
+import { Button, ConfirmDialog, FlatCheckList, PageLoader, UserCard } from "../../ui/index.js";
 import { useAuth } from "../auth/AuthProvider.js";
 import { downloadFlatCheckPdf } from "../pdf/downloadFlatCheckPdf.js";
 
@@ -47,7 +47,7 @@ export function ProfileContainer() {
             {error}
           </p>
         )}
-        {list.isPending && <Spinner label="Loading your saved checks" className="text-lg" />}
+        {list.isPending && <PageLoader label="Loading your saved checks" linkAs={Link} />}
         {list.isError && (
           <div role="alert" className="flex flex-col items-start gap-3">
             <p className="text-lg font-bold">Your saved checks didn't load.</p>

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Download, Trash2 } from "lucide-react";
 import { useChecklist, useDeleteFlatCheck, useFlatCheck } from "../../api/hooks.js";
-import { ActionBar, Button, ChecklistForm, ConfirmDialog, FlatSign, Spinner, formatDate } from "../../ui/index.js";
+import { ActionBar, Button, ChecklistForm, ConfirmDialog, FlatSign, PageLoader, formatDate } from "../../ui/index.js";
 import { toSections } from "../checklist/sections.js";
 import { downloadFlatCheckPdf } from "../pdf/downloadFlatCheckPdf.js";
 
@@ -32,7 +32,7 @@ export function FlatCheckDetailContainer({ id }: { id: string }) {
       </>
     );
   }
-  if (!flat.data || !template.data) return <Spinner label="Loading the check" className="text-lg" />;
+  if (!flat.data || !template.data) return <PageLoader label="Loading the check" linkAs={Link} />;
 
   const { meta, values, createdAt } = flat.data;
   const answered = template.data.fields.filter((f) => values[f.id] !== undefined && values[f.id] !== null).length;

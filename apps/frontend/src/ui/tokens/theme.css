@@ -21,3 +21,17 @@
   --font-display: "Atkinson Hyperlegible Next Variable", system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, monospace;
 }
+
+/* The Tinyverse orbit: one lap of the planet along its ring (see TinyverseLink). */
+@theme {
+  --animate-orbit: orbit 2.6s linear infinite;
+
+  @keyframes orbit {
+    from {
+      offset-distance: 0%;
+    }
+    to {
+      offset-distance: 100%;
+    }
+  }
+}

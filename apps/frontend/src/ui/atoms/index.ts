@@ -4,3 +4,4 @@ export * from "./Input.js";
 export * from "./Pictogram.js";
 export * from "./Spinner.js";
 export * from "./TextArea.js";
+export * from "./TinyverseLink.js";
